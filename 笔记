@@ -1,0 +1,22 @@
+1、什么是蓝图
+一个应用中或跨应用制作应用组件和支持通用的模式
+
+2、蓝图的作用
+-将不同的功能模块化
+-构建大型应用
+-优化项目结构
+-增强可读性，易于维护
+
+
+1、定义蓝图（app/admin/__init__.py）
+from flask import Blueprint
+admin  = Blueprint('admin',__name__)
+import views
+
+2、注册蓝图（app/__init__.py）
+from admin import admin as admin_blueprint
+app.register_blueprint(admin_blueprint,url_prefix = '/admin')
+
+3、调用蓝图（app/admin/views.py）
+from . import admin
+@admin.route('/')
