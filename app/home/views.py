@@ -2,11 +2,6 @@ from . import home  # 导入蓝图对象
 from flask import render_template, redirect, url_for
 
 
-@home.route('/')
-def index():
-    return render_template('home/index.html')
-
-
 @home.route('/login/')
 def login():
     return render_template('home/login.html')
@@ -48,10 +43,10 @@ def moviecol():
 
 
 @home.route('/')
-def loginlog():
-    return render_template('home/.html')
+def index():
+    return render_template('home/index.html')
 
 
-@home.route('/moviecol/')
-def moviecol():
-    return render_template('home/.html')
+@home.route('/animation/')
+def animation():
+    return render_template('home/animation.html')
