@@ -1,6 +1,5 @@
-from . import home #导入蓝图对象
-from flask import render_template,redirect,url_for
-
+from . import home  # 导入蓝图对象
+from flask import render_template, redirect, url_for
 
 
 @home.route('/')
@@ -16,7 +15,7 @@ def login():
 @home.route('/logout/')
 def logout():
     return redirect(url_for('home.login'))
-	
+
 
 @home.route('/regist/')
 def regist():
