@@ -1,7 +1,6 @@
 from . import home  # 导入蓝图对象
 from flask import render_template, redirect, url_for
 
-
 @home.route('/login/')
 def login():
     return render_template('home/login.html')
