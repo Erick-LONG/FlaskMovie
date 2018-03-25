@@ -122,6 +122,7 @@ def tag_edit(id=None):
     return render_template('admin/tag_edit.html',form=form,tag=tag)
 
 
+#添加电影
 @admin.route('/movie/add',methods=['POST','GET'])
 @admin_login_req
 def movie_add():
@@ -138,7 +139,7 @@ def movie_add():
         form.url.data.save(app.config['UP_DIR']+url)
         form.logo.data.save(app.config['UP_DIR'] + logo)
         movie = Movie(
-            title =data['name'],
+            title =data['title'],
             url = url,
             info = data['info'],
             logo = logo,
@@ -157,10 +158,73 @@ def movie_add():
     return render_template('admin/movie_add.html',form=form)
 
 
-@admin.route('/movie/list')
+#电影列表
+@admin.route('/movie/list<int:page>/',methods=['GET'])
 @admin_login_req
-def movie_list():
-    return render_template('admin/movie_list.html')
+def movie_list(page=None):
+    if page is None:
+        page=1
+    page_data = Movie.query.join(Tag).filter(Tag.id==Movie.tag_id).order_by(Movie.add_time.desc()).paginate(page=page,per_page=10)
+
+    return render_template('admin/movie_list.html',page_data = page_data)
+
+
+#电影删除
+@admin.route('/movie/del/<int:id>/',methods=['GET'])
+@admin_login_req
+def movie_del(id=None):
+    movie = Movie.query.filter_by(id=id).first_or_404()
+    db.session.delete(movie)
+    db.session.commit()
+    flash('删除标签成功', 'ok')
+    return redirect(url_for('admin.movie_list',page=1))
+
+
+#编辑电影
+@admin.route('/movie/edit<int:id>/',methods=['POST','GET'])
+@admin_login_req
+def movie_edit(id=None):
+    form = MovieForm()
+    form.url.validators=[]
+    form.logo.validators = []
+    movie = Movie.query.get_or_404(int(id))
+    if request.method=='GET':
+        form.info.data=movie.info
+        form.tag_id.data = movie.tag_id
+        form.star.data = movie.star
+    if form.validate_on_submit():
+        data = form.data
+        movie_count = Movie.query.filter_by(title = data['title']).count()
+        if movie_count ==1 and movie.title != data['title']:
+            flash('片名已经存在','err')
+            return redirect(url_for('admin.movie_edit',id = movie.id))
+
+        if not os.path.exists(app.config['UP_DIR']):
+            os.makedirs(app.config['UP_DIR'])
+            os.chmod(app.config['UP_DIR'], 'rw')
+
+        if form.url.data.filename != '':
+            file_url = secure_filename(form.url.data.filename)
+            movie.url = change_filename(file_url)
+            form.url.data.save(app.config['UP_DIR'] + movie.url)
+
+        if form.logo.data.filename != '':
+            file_logo = secure_filename(form.logo.data.filename)
+            movie.logo = change_filename(file_logo)
+            form.logo.data.save(app.config['UP_DIR'] + movie.logo)
+
+        movie.star = data['star']
+        movie.title = data['title'],
+        movie.info = data['info'],
+        movie.tag_id = data['tag_id'],
+        movie.area = data['area'],
+        movie.release_time = data['release_time'],
+        movie.length = data['length'],
+        db.session.add(movie)
+        db.session.commit()
+        flash('修改电影成功','ok')
+        return redirect(url_for('admin.movie_edit',id = movie.id))
+    return render_template('admin/movie_edit.html',form=form,movie=movie)
 
 
 @admin.route('/preview/add')

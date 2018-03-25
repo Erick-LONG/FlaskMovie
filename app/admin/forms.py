@@ -69,7 +69,7 @@ class TagForm(FlaskForm):
 
 
 class MovieForm(FlaskForm):
-    name = StringField(
+    title = StringField(
         label='片名',
         validators=[
             DataRequired('请输入片名')
